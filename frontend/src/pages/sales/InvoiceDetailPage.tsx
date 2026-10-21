@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Printer, Share2, Pencil, Copy, XCircle, Banknote, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Printer, Share2, Pencil, Copy, XCircle, Banknote, MessageCircle, Download } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -12,7 +12,7 @@ import { useInvoiceStore } from '@/stores/useInvoiceStore'
 import { useBusinessStore } from '@/stores/useBusinessStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { formatCurrency, formatDate } from '@/lib/format'
-import { printDocument } from '@/lib/desktop/printer'
+import { printInvoicePdf, downloadInvoicePdf } from '@/lib/desktop/pdfPrinter'
 import { toast } from '@/stores/useToastStore'
 import { PageNotFound } from '@/components/common/PageNotFound'
 
@@ -33,12 +33,13 @@ export function InvoiceDetailPage() {
   if (!invoice) return <PageNotFound />
 
   const handlePrint = async () => {
-    await printDocument({
-      title: invoice.invoiceNumber,
-      html: document.getElementById('invoice-print-area')?.innerHTML ?? '<p>Invoice</p>',
-      paperSize: 'a4',
-    })
-    toast.info('Printing', `${invoice.invoiceNumber} sent to printer.`)
+    await printInvoicePdf(invoice, business, settings.invoice)
+    toast.info('Printing', `${invoice.invoiceNumber} PDF opened for printing.`)
+  }
+
+  const handleDownload = async () => {
+    await downloadInvoicePdf(invoice, business, settings.invoice)
+    toast.success('Downloaded', `Invoice ${invoice.invoiceNumber}.pdf downloaded.`)
   }
 
   const balance = invoice.grandTotal - invoice.amountPaid
@@ -60,11 +61,11 @@ export function InvoiceDetailPage() {
         <Button variant="outline" size="sm" onClick={() => duplicateInvoice(invoice.id)}>
           <Copy className="h-4 w-4" /> Duplicate
         </Button>
-        <Button variant="outline" size="sm" onClick={() => toast.info('WhatsApp', 'Sharing invoice on WhatsApp (demo).')}>
-          <MessageCircle className="h-4 w-4 text-success" /> Share
+        <Button variant="outline" size="sm" onClick={handleDownload}>
+          <Download className="h-4 w-4" /> Download PDF
         </Button>
         <Button variant="outline" size="sm" onClick={handlePrint}>
-          <Printer className="h-4 w-4" /> Print
+          <Printer className="h-4 w-4" /> Print Bill (PDF)
         </Button>
         {invoice.status !== 'cancelled' && balance > 0 && (
           <Button size="sm" onClick={() => setPayOpen(true)}>

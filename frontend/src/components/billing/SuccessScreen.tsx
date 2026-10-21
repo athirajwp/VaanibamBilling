@@ -1,4 +1,4 @@
-import { CheckCircle2, Printer, Share2, Plus } from 'lucide-react'
+import { CheckCircle2, Printer, Share2, Plus, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/format'
 import type { Invoice } from '@/types'
@@ -6,6 +6,7 @@ import { useBusinessStore } from '@/stores/useBusinessStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { InvoicePreview } from './InvoicePreview'
 import { printDocument } from '@/lib/desktop/printer'
+import { printInvoicePdf, downloadInvoicePdf } from '@/lib/desktop/pdfPrinter'
 import { toast } from '@/stores/useToastStore'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -20,12 +21,13 @@ export function SuccessScreen({ invoice, onNewSale, onClose }: SuccessScreenProp
   const settings = useSettingsStore((s) => s.settings)
 
   const handlePrint = async () => {
-    await printDocument({
-      title: invoice.invoiceNumber,
-      html: document.getElementById('print-root')?.innerHTML ?? '<p>Invoice</p>',
-      paperSize: 'a4',
-    })
-    toast.info('Printing', 'Invoice sent to printer.')
+    await printInvoicePdf(invoice, business, settings.invoice)
+    toast.info('Printing', 'Invoice PDF sent to printer.')
+  }
+
+  const handleDownload = async () => {
+    await downloadInvoicePdf(invoice, business, settings.invoice)
+    toast.success('Downloaded', `Invoice ${invoice.invoiceNumber}.pdf downloaded.`)
   }
 
   return (
@@ -42,7 +44,10 @@ export function SuccessScreen({ invoice, onNewSale, onClose }: SuccessScreenProp
 
       <div className="no-print mx-auto mt-5 flex flex-wrap items-center justify-center gap-2">
         <Button onClick={handlePrint}>
-          <Printer className="h-4 w-4" /> Print Invoice
+          <Printer className="h-4 w-4" /> Print Bill (PDF)
+        </Button>
+        <Button variant="outline" onClick={handleDownload}>
+          <Download className="h-4 w-4" /> Download PDF
         </Button>
         <Button variant="outline" onClick={() => toast.info('Share', 'Sharing link copied (demo).')}>
           <Share2 className="h-4 w-4" /> Share

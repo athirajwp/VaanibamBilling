@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { Save, PauseCircle, Printer, MessageCircle, CheckCircle, Plus } from 'lucide-react'
+import { Save, PauseCircle, Printer, MessageCircle, CheckCircle, Plus, Download, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { CustomerSelector } from '@/components/billing/CustomerSelector'
@@ -20,6 +20,7 @@ import type { Invoice, InvoiceItem, Product } from '@/types'
 import { computeLine, computeTotals } from '@/lib/billing'
 import { formatCurrency } from '@/lib/format'
 import { printDocument } from '@/lib/desktop/printer'
+import { printInvoicePdf, downloadInvoicePdf } from '@/lib/desktop/pdfPrinter'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -127,6 +128,26 @@ export function BillingPage() {
       paperSize: previewTab,
     })
     toast.info('Print preview opened', 'Use your browser print dialog.')
+  }
+
+  const handlePrintPdf = async () => {
+    if (items.length === 0) {
+      toast.warning('Nothing to print', 'Add products to your invoice first.')
+      return
+    }
+    const inv = previewInvoice(customerId, items, totals, business.invoicePrefix, nextInvoiceNumber)
+    await printInvoicePdf(inv, business, settings.invoice, previewTab)
+    toast.info('PDF generated', 'Opening PDF print preview.')
+  }
+
+  const handleDownloadPdf = async () => {
+    if (items.length === 0) {
+      toast.warning('Nothing to download', 'Add products to your invoice first.')
+      return
+    }
+    const inv = previewInvoice(customerId, items, totals, business.invoicePrefix, nextInvoiceNumber)
+    await downloadInvoicePdf(inv, business, settings.invoice, previewTab)
+    toast.success('Downloaded', `Invoice ${inv.invoiceNumber}.pdf downloaded.`)
   }
 
   useKeyboardShortcuts([
@@ -337,10 +358,13 @@ export function BillingPage() {
               <p className="py-8 text-center text-sm text-muted-foreground">Add products to preview your invoice.</p>
             )}
           </div>
-          <div className="mt-4 flex justify-end gap-2 border-t pt-4">
+          <div className="mt-4 flex flex-wrap justify-end gap-2 border-t pt-4">
             <Button variant="outline" onClick={() => setPrintOpen(false)}>Close</Button>
-            <Button onClick={printPreview}>
-              <Printer className="h-4 w-4" /> Print
+            <Button variant="outline" onClick={handleDownloadPdf}>
+              <Download className="h-4 w-4" /> Download PDF
+            </Button>
+            <Button onClick={handlePrintPdf}>
+              <Printer className="h-4 w-4" /> Print Bill (PDF)
             </Button>
           </div>
         </DialogContent>
