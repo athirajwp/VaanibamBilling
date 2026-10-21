@@ -8,7 +8,7 @@ import { InvoiceItemsTable } from '@/components/billing/InvoiceItemsTable'
 import { PaymentModal } from '@/components/billing/PaymentModal'
 import { SuccessScreen } from '@/components/billing/SuccessScreen'
 import { InvoicePreview } from '@/components/billing/InvoicePreview'
-import { Drawer } from '@/components/common/Drawer'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useProductStore } from '@/stores/useProductStore'
@@ -35,6 +35,7 @@ export function BillingPage() {
   const [additionalDiscount, setAdditionalDiscount] = useState(0)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [printOpen, setPrintOpen] = useState(false)
+  const [previewTab, setPreviewTab] = useState<'a4' | 'thermal'>('a4')
   const [completedInvoice, setCompletedInvoice] = useState<Invoice | null>(null)
   const productSearchKey = useRef(0)
 
@@ -118,10 +119,12 @@ export function BillingPage() {
       toast.warning('Nothing to print', 'Add products to your invoice first.')
       return
     }
+    const targetId = previewTab === 'thermal' ? 'billing-preview-thermal' : 'billing-preview-a4'
+    const html = document.getElementById(targetId)?.innerHTML ?? '<p>Invoice</p>'
     await printDocument({
-      title: 'Invoice Preview',
-      html: document.getElementById('billing-preview')?.innerHTML ?? '<p>Invoice</p>',
-      paperSize: 'a4',
+      title: `Invoice-${business.invoicePrefix || 'INV'}-${nextInvoiceNumber}`,
+      html,
+      paperSize: previewTab,
     })
     toast.info('Print preview opened', 'Use your browser print dialog.')
   }
@@ -297,43 +300,51 @@ export function BillingPage() {
         onComplete={handleComplete}
       />
 
-      <Drawer open={printOpen} onOpenChange={setPrintOpen} title="Invoice Preview" side="right" className="max-w-2xl w-full">
-        <div id="billing-preview">
-          {items.length > 0 ? (
-            <Tabs defaultValue="a4">
-              <TabsList className="w-full">
-                <TabsTrigger value="a4" className="flex-1">A4</TabsTrigger>
-                <TabsTrigger value="thermal" className="flex-1">Thermal</TabsTrigger>
-              </TabsList>
-              <TabsContent value="a4">
-                <InvoicePreview
-                  invoice={previewInvoice(customerId, items, totals, business.invoicePrefix, nextInvoiceNumber)}
-                  business={business}
-                  invoiceSettings={settings.invoice}
-                />
-              </TabsContent>
-              <TabsContent value="thermal">
-                <div className="flex justify-center">
-                  <InvoicePreview
-                    invoice={previewInvoice(customerId, items, totals, business.invoicePrefix, nextInvoiceNumber)}
-                    business={business}
-                    invoiceSettings={settings.invoice}
-                    variant="thermal"
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">Add products to preview your invoice.</p>
-          )}
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setPrintOpen(false)}>Close</Button>
-          <Button onClick={printPreview}>
-            <Printer className="h-4 w-4" /> Print
-          </Button>
-        </div>
-      </Drawer>
+      <Dialog open={printOpen} onOpenChange={setPrintOpen}>
+        <DialogContent className="max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Invoice Preview</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            {items.length > 0 ? (
+              <Tabs value={previewTab} onValueChange={(val) => setPreviewTab(val as 'a4' | 'thermal')} className="w-full">
+                <TabsList className="w-full">
+                  <TabsTrigger value="a4" className="flex-1">A4</TabsTrigger>
+                  <TabsTrigger value="thermal" className="flex-1">Thermal</TabsTrigger>
+                </TabsList>
+                <TabsContent value="a4" className="mt-4">
+                  <div id="billing-preview-a4" className="w-full flex justify-center">
+                    <InvoicePreview
+                      invoice={previewInvoice(customerId, items, totals, business.invoicePrefix, nextInvoiceNumber)}
+                      business={business}
+                      invoiceSettings={settings.invoice}
+                      variant="a4"
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="thermal" className="mt-4">
+                  <div id="billing-preview-thermal" className="w-full flex justify-center">
+                    <InvoicePreview
+                      invoice={previewInvoice(customerId, items, totals, business.invoicePrefix, nextInvoiceNumber)}
+                      business={business}
+                      invoiceSettings={settings.invoice}
+                      variant="thermal"
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">Add products to preview your invoice.</p>
+            )}
+          </div>
+          <div className="mt-4 flex justify-end gap-2 border-t pt-4">
+            <Button variant="outline" onClick={() => setPrintOpen(false)}>Close</Button>
+            <Button onClick={printPreview}>
+              <Printer className="h-4 w-4" /> Print
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

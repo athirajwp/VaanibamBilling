@@ -42,7 +42,7 @@ export async function printDocument(payload: PrintPayload): Promise<PrinterCapab
 
   const pageCss = isThermal
     ? '@page { size: 80mm auto; margin: 0; } body { padding: 4mm; } .print-sheet { width: 72mm; margin: 0 auto; }'
-    : '@page { size: A4; margin: 12mm; }'
+    : '@page { size: A4; margin: 10mm; } .print-sheet { width: 100%; max-width: 720px; margin: 0 auto; }'
 
   const win = window.open('', '_blank')
   if (win) {
@@ -51,8 +51,19 @@ export async function printDocument(payload: PrintPayload): Promise<PrinterCapab
         `<style>${appCss}</style>` +
         `<style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { color: #111; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          @media print { body { background: #fff; } }
+          body {
+            color: #111;
+            background: #fff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: ${isThermal ? '0' : '16px'};
+          }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { box-sizing: border-box; }
+          @media print {
+            body { background: #fff; padding: 0; }
+          }
           ${pageCss}
         </style>` +
         `</head><body><div class="print-sheet">${payload.html}</div></body></html>`,
