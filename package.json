@@ -1,0 +1,16 @@
+{
+  "name": "bizflow-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "BizFlow Billing & Inventory Management Software",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "frontend:dev": "npm run dev --prefix frontend",
+    "frontend:build": "npm run build --prefix frontend",
+    "frontend:lint": "npm run lint --prefix frontend",
+    "backend:dev": "cd backend && mvn spring-boot:run",
+    "backend:test": "cd backend && mvn test",
+    "backend:build": "cd backend && mvn clean package -DskipTests"
+  }
+}

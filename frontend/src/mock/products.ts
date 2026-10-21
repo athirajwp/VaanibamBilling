@@ -1,0 +1,295 @@
+import type { Product, ProductCategory } from '@/types'
+
+const now = '2026-08-01T00:00:00.000Z'
+
+export const categories: ProductCategory[] = [
+  { id: 'cat-sparkler', name: 'Sparklers' },
+  { id: 'cat-flowerpot', name: 'Flower Pots' },
+  { id: 'cat-rocket', name: 'Rockets' },
+  { id: 'cat-chakkar', name: 'Chakkars' },
+  { id: 'cat-fancy', name: 'Fancy Shots' },
+  { id: 'cat-gift', name: 'Gift Boxes' },
+  { id: 'cat-lakshmi', name: 'Lakshmi' },
+  { id: 'cat-ground', name: 'Ground Spinners' },
+  { id: 'cat-bomb', name: 'Bombs' },
+]
+
+function crackersProduct(
+  id: string,
+  name: string,
+  sku: string,
+  category: string,
+  brand: string,
+  unit: string,
+  purchasePrice: number,
+  sellingPrice: number,
+  stock: number,
+  minStock: number,
+  gstRate: number,
+  hsn: string,
+  productType: string,
+  piecesPerBox: number,
+  bulkPricing: { from: number; to: number | null; price: number }[],
+): Product {
+  const boxQty = Math.max(1, piecesPerBox)
+  return {
+    id,
+    name,
+    sku,
+    barcode: `89010${String(Math.abs(Number(id.replace(/\D/g, '')) || 100) + 5000)}00`,
+    category,
+    brand,
+    unit,
+    purchasePrice,
+    sellingPrice,
+    mrp: Math.round(sellingPrice * 1.08),
+    wholesalePrice: sellingPrice * 0.92,
+    taxType: 'gst',
+    gstRate,
+    hsn,
+    openingStock: stock,
+    currentStock: stock,
+    minStock,
+    godown: 'Main Godown',
+    status: 'active',
+    isCrackers: true,
+    crackers: {
+      productType,
+      boxQuantity: boxQty,
+      piecesPerBox,
+      purchaseUnit: 'Box',
+      sellingUnit: 'Piece',
+      wholesalePrice: purchasePrice * 0.95,
+      retailPrice: sellingPrice,
+      seasonalPrice: Math.round(sellingPrice * 1.15),
+      bulkPricing: bulkPricing.map((tier, i) => ({ id: `${id}-t${i}`, ...tier })),
+    },
+    createdAt: now,
+  }
+}
+
+export const products: Product[] = [
+  crackersProduct(
+    'p-001', '5½" Lakshmi Sparkler', 'SKU-0001', 'Sparklers', 'Lakshmi',
+    'Box', 1050, 1200, 24, 8, 18, '3605',
+    'Sparkler', 10,
+    [
+      { from: 1, to: 10, price: 1100 },
+      { from: 11, to: 50, price: 1050 },
+      { from: 51, to: 100, price: 1000 },
+      { from: 101, to: null, price: 950 },
+    ],
+  ),
+  crackersProduct(
+    'p-002', '7" Champion Sparkler', 'SKU-0002', 'Sparklers', 'Champion',
+    'Box', 720, 850, 18, 6, 18, '3605',
+    'Sparkler', 10,
+    [
+      { from: 1, to: 10, price: 780 },
+      { from: 11, to: 50, price: 750 },
+      { from: 51, to: null, price: 720 },
+    ],
+  ),
+  crackersProduct(
+    'p-003', 'Flower Pot - 18 Shots', 'SKU-0003', 'Flower Pots', 'Vedika',
+    'Box', 320, 400, 40, 10, 18, '3605',
+    'Flower Pot', 4,
+    [
+      { from: 1, to: 10, price: 360 },
+      { from: 11, to: 50, price: 340 },
+      { from: 51, to: null, price: 320 },
+    ],
+  ),
+  crackersProduct(
+    'p-004', 'Flower Pot - 45 Shots', 'SKU-0004', 'Flower Pots', 'Vedika',
+    'Box', 780, 950, 12, 4, 18, '3605',
+    'Flower Pot', 4,
+    [
+      { from: 1, to: 10, price: 870 },
+      { from: 11, to: null, price: 820 },
+    ],
+  ),
+  crackersProduct(
+    'p-005', 'Brahmastra Rocket (10 pc)', 'SKU-0005', 'Rockets', 'Brahmastra',
+    'Box', 240, 300, 30, 8, 18, '3605',
+    'Rocket', 10,
+    [
+      { from: 1, to: 10, price: 275 },
+      { from: 11, to: 50, price: 260 },
+      { from: 51, to: null, price: 245 },
+    ],
+  ),
+  crackersProduct(
+    'p-006', 'White Rocket Combo', 'SKU-0006', 'Rockets', 'Classic',
+    'Box', 400, 480, 15, 5, 18, '3605',
+    'Rocket', 12,
+    [
+      { from: 1, to: 10, price: 440 },
+      { from: 11, to: null, price: 415 },
+    ],
+  ),
+  crackersProduct(
+    'p-007', 'Ground Chakkar', 'SKU-0007', 'Chakkars', 'Vedika',
+    'Box', 300, 360, 35, 10, 18, '3605',
+    'Chakkar', 20,
+    [
+      { from: 1, to: 10, price: 330 },
+      { from: 11, to: 50, price: 315 },
+      { from: 51, to: null, price: 300 },
+    ],
+  ),
+  crackersProduct(
+    'p-008', 'Colour Wheel Chakkar', 'SKU-0008', 'Chakkars', 'Colour',
+    'Box', 420, 500, 8, 4, 18, '3605',
+    'Chakkar', 12,
+    [
+      { from: 1, to: 10, price: 460 },
+      { from: 11, to: null, price: 435 },
+    ],
+  ),
+  crackersProduct(
+    'p-009', 'Fancy Shot - 1000', 'SKU-0009', 'Fancy Shots', 'Fancy',
+    'Box', 1150, 1300, 10, 3, 18, '3605',
+    'Fancy Shot', 8,
+    [
+      { from: 1, to: 10, price: 1200 },
+      { from: 11, to: null, price: 1150 },
+    ],
+  ),
+  crackersProduct(
+    'p-010', 'Fancy Shot - 500', 'SKU-0010', 'Fancy Shots', 'Fancy',
+    'Box', 620, 720, 14, 4, 18, '3605',
+    'Fancy Shot', 6,
+    [
+      { from: 1, to: 10, price: 660 },
+      { from: 11, to: null, price: 635 },
+    ],
+  ),
+  crackersProduct(
+    'p-011', 'Lakshmi Gift Box - Deluxe', 'SKU-0011', 'Gift Boxes', 'Lakshmi',
+    'Box', 1450, 1650, 9, 3, 18, '3605',
+    'Gift Box', 1,
+    [
+      { from: 1, to: 10, price: 1520 },
+      { from: 11, to: null, price: 1450 },
+    ],
+  ),
+  crackersProduct(
+    'p-012', 'Assorted Gift Box', 'SKU-0012', 'Gift Boxes', 'Classic',
+    'Box', 850, 999, 20, 6, 18, '3605',
+    'Gift Box', 1,
+    [
+      { from: 1, to: 10, price: 920 },
+      { from: 11, to: null, price: 870 },
+    ],
+  ),
+  crackersProduct(
+    'p-013', '2½" Lakshmi', 'SKU-0013', 'Lakshmi', 'Lakshmi',
+    'Box', 420, 500, 3, 8, 18, '3605',
+    'Lakshmi', 10,
+    [
+      { from: 1, to: 10, price: 460 },
+      { from: 11, to: 50, price: 440 },
+      { from: 51, to: null, price: 420 },
+    ],
+  ),
+  crackersProduct(
+    'p-014', '4" Lakshmi', 'SKU-0014', 'Lakshmi', 'Lakshmi',
+    'Box', 680, 780, 22, 8, 18, '3605',
+    'Lakshmi', 10,
+    [
+      { from: 1, to: 10, price: 720 },
+      { from: 11, to: 50, price: 700 },
+      { from: 51, to: null, price: 680 },
+    ],
+  ),
+  crackersProduct(
+    'p-015', 'Ground Spinner (Pack of 10)', 'SKU-0015', 'Ground Spinners', 'Spin',
+    'Box', 150, 180, 50, 12, 18, '3605',
+    'Ground Spinner', 10,
+    [
+      { from: 1, to: 10, price: 165 },
+      { from: 11, to: 50, price: 158 },
+      { from: 51, to: null, price: 150 },
+    ],
+  ),
+  crackersProduct(
+    'p-016', 'Bomb - D50', 'SKU-0016', 'Bombs', 'Vedika',
+    'Box', 520, 620, 16, 5, 18, '3604',
+    'Bomb', 24,
+    [
+      { from: 1, to: 10, price: 570 },
+      { from: 11, to: null, price: 540 },
+    ],
+  ),
+  crackersProduct(
+    'p-017', 'Bomb - D100', 'SKU-0017', 'Bombs', 'Vedika',
+    'Box', 980, 1150, 6, 3, 18, '3604',
+    'Bomb', 24,
+    [
+      { from: 1, to: 10, price: 1060 },
+      { from: 11, to: null, price: 1000 },
+    ],
+  ),
+  crackersProduct(
+    'p-018', 'Sky Shot - 50', 'SKU-0018', 'Fancy Shots', 'Sky',
+    'Box', 1450, 1650, 4, 4, 18, '3605',
+    'Sky Shot', 4,
+    [
+      { from: 1, to: 10, price: 1520 },
+      { from: 11, to: null, price: 1460 },
+    ],
+  ),
+  {
+    id: 'p-019',
+    name: 'Bamboo Mats (Pack of 20)',
+    sku: 'SKU-0019',
+    barcode: '8901048220019',
+    category: 'Accessories',
+    brand: 'Classic',
+    unit: 'Pack',
+    purchasePrice: 60,
+    sellingPrice: 90,
+    mrp: 100,
+    wholesalePrice: 75,
+    taxType: 'gst',
+    gstRate: 5,
+    hsn: '4602',
+    openingStock: 120,
+    currentStock: 120,
+    minStock: 20,
+    godown: 'Main Godown',
+    status: 'active',
+    isCrackers: false,
+    createdAt: now,
+  },
+  {
+    id: 'p-020',
+    name: 'Cartons (Used - Large)',
+    sku: 'SKU-0020',
+    barcode: '8901048220020',
+    category: 'Accessories',
+    brand: 'Classic',
+    unit: 'Piece',
+    purchasePrice: 35,
+    sellingPrice: 50,
+    mrp: 60,
+    wholesalePrice: 42,
+    taxType: 'non-gst',
+    gstRate: 0,
+    hsn: '4819',
+    openingStock: 200,
+    currentStock: 200,
+    minStock: 50,
+    godown: 'Main Godown',
+    status: 'active',
+    isCrackers: false,
+    createdAt: now,
+  },
+]
+
+export const godowns = [
+  { id: 'g-001', name: 'Main Godown', address: 'Sivakasi Main Road, Sivakasi', manager: 'Murugan S' },
+  { id: 'g-002', name: 'Retail Store', address: 'Market Street, Sivakasi', manager: 'Athi K' },
+  { id: 'g-003', name: 'Warehouse', address: 'Kovilpatti Road, Sivakasi', manager: 'Pandian R' },
+]
